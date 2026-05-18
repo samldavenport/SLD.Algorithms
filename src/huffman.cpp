@@ -86,7 +86,13 @@ namespace sld {
         );
 
         // initialize the tree
-        
+        huffman_tree_init(
+            hffmn->tree,
+            hffmn->heap,
+            hffmn->table
+        );
+
+
     }
 
 
@@ -155,14 +161,48 @@ namespace sld {
               ++index) {
 
 
-            u32& node_index = tree->node_count++;
+            u32& node_index = tree->node_count;
+
             tree->node_array.frequency  [node_index] = table->dense_array.frequencies [index];
             tree->node_array.symbol     [node_index] = table->dense_array.symbols     [index];
             tree->node_array.node_left  [node_index] = HUFFMAN_INVALID;
             tree->node_array.node_right [node_index] = HUFFMAN_INVALID;
 
             huffman_heap_push(heap, tree, node_index);
+
+            ++node_index;
         }
+    }
+
+    SLD_ALGORITHMS_INTERNAL void
+    huffman_tree_merge_nodes(
+        huffman_tree* tree,
+        huffman_heap* heap) {
+
+        assert(tree != NULL && heap != NULL);
+
+        while(heap->size > 1) {
+
+            const u16 node_child_left  = huffman_heap_pop(heap, tree);
+            const u16 node_child_right = huffman_heap_pop(heap, tree);
+            u16&      node_parent      = tree->node_count;
+
+            tree->node_array.frequency[node_parent] = (
+                tree->node_array.frequency[node_child_left] +
+                tree->node_array.frequency[node_child_right]
+            );
+
+            tree->node_array.node_left  [node_parent] = node_child_left;
+            tree->node_array.node_right [node_parent] = node_child_right;
+            tree->node_array.node_right [node_parent] = node_child_right;
+            tree->node_array.symbol     [node_parent] = node_child_right;
+
+            huffman_heap_push(heap, tree, node_parent);
+            
+            ++parent;
+        }
+
+        tree->root = huffman_heap_pop(heap, tree);
     }
 
     SLD_ALGORITHMS_INTERNAL void
@@ -193,7 +233,7 @@ namespace sld {
         }
     }
 
-    SLD_ALGORITHMS_INTERNAL void
+    SLD_ALGORITHMS_INTERNAL u16
     huffman_heap_pop(
         huffman_heap* heap,
         huffman_tree* tree) {

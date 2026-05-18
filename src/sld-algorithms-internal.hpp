@@ -31,6 +31,7 @@ namespace sld {
 
     struct huffman_tree {
         u16 node_count;
+        u16 root;
         struct {
             u32 frequency  [HUFFMAN_MAX_NODES];
             u16 symbol     [HUFFMAN_MAX_NODES];
@@ -61,9 +62,12 @@ namespace sld {
     };
 
     void huffman_frequency_table_build (huffman_frequency_table* table, const byte* data_ptr, const u32 data_size);
-    void huffman_tree_init             (huffman_tree* tree, const huffman_frequency_table* table);
+   
+    void huffman_tree_init             (huffman_tree* tree, huffman_heap* heap, const huffman_frequency_table* table);
+    void huffman_tree_merge_nodes      (huffman_tree* tree, huffman_heap* heap);
+   
     void huffman_heap_push             (huffman_heap* heap, huffman_tree* tree, const u16 node_index);
-    void huffman_heap_pop              (huffman_heap* heap, huffman_tree* tree);
+    u16  huffman_heap_pop              (huffman_heap* heap, huffman_tree* tree);
 };
 
 #endif //SLD_ALGORITHMS_INTERNAL_HPP
